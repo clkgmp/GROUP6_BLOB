@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { put, list } from "@vercel/blob";
+import { truncate } from "fs/promises";
 
 const FILE_NAME = "movies.json";
 
@@ -64,6 +65,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
+        allowOverwrite: true,  
       addRandomSuffix: false,          // ⚡ important for overwrites
       ...(process.env.BLOB_READ_WRITE_TOKEN ? { token: process.env.BLOB_READ_WRITE_TOKEN } : {}),
     });
@@ -91,6 +93,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await put(FILE_NAME, JSON.stringify(newMovies, null, 2), {
       access: "public",
       contentType: "application/json",
+        allowOverwrite: true,  
+      addRandomSuffix: false,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 

@@ -6,17 +6,20 @@ const FILE_NAME = "movies.json";
 // ✅ Helper: get movies.json from Blob
 async function getMovies(): Promise<any[]> {
   try {
-    const blobs = await list({ token: process.env.BLOB_READ_WRITE_TOKEN });
-    const file = blobs.blobs.find((b) => b.pathname === FILE_NAME);
+    const blobsList = await list({ token: process.env.BLOB_READ_WRITE_TOKEN });
+    // Find the blob exactly named movies.json
+    const file = blobsList.blobs.find((b) => b.pathname === FILE_NAME);
     if (!file) return [];
 
     const res = await fetch(file.url);
     if (!res.ok) return [];
     return await res.json();
-  } catch {
+  } catch (err) {
+    console.error("Error fetching movies from blob:", err);
     return [];
   }
 }
+
 
 // ✅ GET all movies
 export async function GET() {
@@ -51,6 +54,7 @@ export async function POST(request: NextRequest) {
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
+        allowOverwrite: true,  
       addRandomSuffix: false,          // ⚡ important for overwrites
       ...(process.env.BLOB_READ_WRITE_TOKEN ? { token: process.env.BLOB_READ_WRITE_TOKEN } : {}),
     });

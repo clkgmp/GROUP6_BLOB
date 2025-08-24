@@ -1,12 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { put, del, list, head } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
 const FILE_NAME = "movies.json";
 
-// Helper: get movies.json from blob
+// ✅ Helper: get movies.json from Blob
 async function getMovies(): Promise<any[]> {
   try {
-    const res = await fetch(`${process.env.BLOB_URL}/${FILE_NAME}`);
+    const blobs = await list({ token: process.env.BLOB_READ_WRITE_TOKEN });
+    const file = blobs.blobs.find((b) => b.pathname === FILE_NAME);
+    if (!file) return [];
+
+    const res = await fetch(file.url);
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -14,7 +18,7 @@ async function getMovies(): Promise<any[]> {
   }
 }
 
-// GET all movies
+// ✅ GET all movies
 export async function GET() {
   try {
     const movies = await getMovies();
@@ -25,7 +29,7 @@ export async function GET() {
   }
 }
 
-// POST add a new movie
+// ✅ POST add a new movie
 export async function POST(request: NextRequest) {
   try {
     const { title, year, status } = await request.json();
@@ -33,11 +37,9 @@ export async function POST(request: NextRequest) {
     if (!title?.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
-
     if (!year || year < 1900 || year > new Date().getFullYear() + 5) {
       return NextResponse.json({ error: "Valid year is required" }, { status: 400 });
     }
-
     if (!status || !["watched", "unwatched"].includes(status)) {
       return NextResponse.json({ error: "Valid status is required" }, { status: 400 });
     }
@@ -50,6 +52,7 @@ export async function POST(request: NextRequest) {
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
+      token: process.env.BLOB_READ_WRITE_TOKEN, // ✅ only needed locally
     });
 
     return NextResponse.json({ message: "Movie added successfully", id: newMovie.id }, { status: 201 });

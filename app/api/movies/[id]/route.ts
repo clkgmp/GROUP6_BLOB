@@ -1,12 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
 const FILE_NAME = "movies.json";
 
-// Helper: get movies.json from blob
+// ✅ Helper: get movies.json from Blob
 async function getMovies(): Promise<any[]> {
   try {
-    const res = await fetch(`${process.env.BLOB_URL}/${FILE_NAME}`);
+    const blobs = await list({ token: process.env.BLOB_READ_WRITE_TOKEN });
+    const file = blobs.blobs.find((b) => b.pathname === FILE_NAME);
+    if (!file) return [];
+
+    const res = await fetch(file.url);
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -14,7 +18,7 @@ async function getMovies(): Promise<any[]> {
   }
 }
 
-// GET single movie
+// ✅ GET single movie
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-// PUT update movie
+// ✅ PUT update movie
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { title, year, status } = await request.json();
@@ -41,11 +45,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (!title?.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
-
     if (!year || year < 1900 || year > new Date().getFullYear() + 5) {
       return NextResponse.json({ error: "Valid year is required" }, { status: 400 });
     }
-
     if (!status || !["watched", "unwatched"].includes(status)) {
       return NextResponse.json({ error: "Valid status is required" }, { status: 400 });
     }
@@ -62,6 +64,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     return NextResponse.json({ message: "Movie updated successfully" });
@@ -71,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-// DELETE movie
+// ✅ DELETE movie
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
@@ -85,6 +88,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await put(FILE_NAME, JSON.stringify(newMovies, null, 2), {
       access: "public",
       contentType: "application/json",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     return NextResponse.json({ message: "Movie deleted successfully" });

@@ -52,8 +52,11 @@ export async function POST(request: NextRequest) {
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
-      token: process.env.BLOB_READ_WRITE_TOKEN, // ✅ only needed locally
+      ...(process.env.BLOB_READ_WRITE_TOKEN
+        ? { token: process.env.BLOB_READ_WRITE_TOKEN } // only used locally
+        : {}),
     });
+
 
     return NextResponse.json({ message: "Movie added successfully", id: newMovie.id }, { status: 201 });
   } catch (error) {

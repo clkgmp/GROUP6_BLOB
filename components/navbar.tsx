@@ -67,46 +67,43 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Bottom Navigation - Fixed and Improved */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center justify-around py-3 px-2">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <Button
-                key={item.href}
-                variant={isActive ? "default" : "ghost"}
-                size="sm"
-                asChild
-                className={cn(
-                  "flex flex-col items-center justify-center space-y-1 h-16 w-20 rounded-lg transition-all duration-200",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-lg" 
-                    : "hover:bg-muted/50",
-                  "active:scale-95"
-                )}
-              >
-                <Link href={item.href} className="flex flex-col items-center justify-center w-full h-full">
+      {/* Mobile Bottom Navigation - Beautiful Redesign */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+        <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border rounded-2xl shadow-2xl p-2">
+          <div className="flex items-center justify-around">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link 
+                  key={item.href} 
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center justify-center py-3 px-6 rounded-xl transition-all duration-300 ease-out",
+                    isActive 
+                      ? "bg-primary text-primary-foreground shadow-lg scale-105" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  )}
+                >
                   <Icon className={cn(
-                    "h-6 w-6 mb-1",
-                    isActive ? "text-primary-foreground" : "text-muted-foreground"
+                    "h-6 w-6 mb-2 transition-transform duration-300",
+                    isActive ? "scale-110" : "group-hover:scale-105"
                   )} />
                   <span className={cn(
-                    "text-xs font-medium leading-tight text-center",
+                    "text-xs font-semibold leading-tight text-center transition-colors duration-300",
                     isActive ? "text-primary-foreground" : "text-muted-foreground"
                   )}>
                     {item.label}
                   </span>
                 </Link>
-              </Button>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Add bottom padding for mobile to account for fixed bottom navigation */}
-      <div className="md:hidden h-20" />
+      {/* Add bottom padding for mobile to account for floating bottom navigation */}
+      <div className="md:hidden h-32" />
     </>
   )
 }

@@ -48,14 +48,15 @@ export async function POST(request: NextRequest) {
     const newMovie = { id: Date.now(), title: title.trim(), year, status };
 
     movies.push(newMovie);
-
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
       ...(process.env.BLOB_READ_WRITE_TOKEN
-        ? { token: process.env.BLOB_READ_WRITE_TOKEN } // only used locally
+        ? { token: process.env.BLOB_READ_WRITE_TOKEN } // local only
         : {}),
+      addRandomSuffix: false, // ✅ prevents creating a new blob every time
     });
+
 
 
     return NextResponse.json({ message: "Movie added successfully", id: newMovie.id }, { status: 201 });

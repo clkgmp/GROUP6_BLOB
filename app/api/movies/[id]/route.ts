@@ -64,11 +64,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     await put(FILE_NAME, JSON.stringify(movies, null, 2), {
       access: "public",
       contentType: "application/json",
-      ...(process.env.BLOB_READ_WRITE_TOKEN
-        ? { token: process.env.BLOB_READ_WRITE_TOKEN } // local only
-        : {}),
-      addRandomSuffix: false, // ✅ prevents creating a new blob every time
+      addRandomSuffix: false,          // ⚡ important for overwrites
+      ...(process.env.BLOB_READ_WRITE_TOKEN ? { token: process.env.BLOB_READ_WRITE_TOKEN } : {}),
     });
+
 
 
     return NextResponse.json({ message: "Movie updated successfully" });
